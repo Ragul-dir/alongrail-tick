@@ -1,4 +1,5 @@
-# Wakes the Alongrail outreach queue every five minutes.
+# Wakes the Alongrail outreach queue every five minutes, at :02, :07, :12 …
+# (off the top of the hour, when GitHub delays and drops scheduled runs most).
 # (Re-registered 30 September 2026: GitHub fired no scheduled run from the first push.)
 # GitHub's shortest schedule; runs can start a few minutes late, or be
 # dropped at busy times, which is what backstop.yml is for.
@@ -9,7 +10,7 @@ name: tick
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '2-59/5 * * * *'
   workflow_dispatch:
 
 permissions: {}
