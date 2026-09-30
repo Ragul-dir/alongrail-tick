@@ -1,0 +1,39 @@
+# Keeps the schedules alive. GitHub turns off a public repository's
+# scheduled workflows after 60 days without activity. Once a month this
+# re-enables tick.yml and backstop.yml, and, when the last commit is 25
+# days old or more, adds an empty commit — so there is never a 60-day gap.
+# Run it by hand after re-enabling a workflow GitHub turned off.
+name: keepalive
+
+on:
+  schedule:
+    - cron: '23 4 1 * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Re-enable the schedules
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for w in tick.yml backstop.yml keepalive.yml; do
+            gh api -X PUT "repos/${{ github.repository }}/actions/workflows/$w/enable" && echo "enabled $w"
+          done
+      - name: An empty commit when the last one is 25 days old
+        run: |
+          age=$(( ($(date +%s) - $(git log -1 --format=%ct)) / 86400 ))
+          echo "last commit $age days ago"
+          if [ "$age" -ge 25 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "Keep the schedules alive"
+            git push
+          fi

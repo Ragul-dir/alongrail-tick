@@ -1,0 +1,32 @@
+# Wakes the Alongrail outreach queue every five minutes.
+# GitHub's shortest schedule; runs can start a few minutes late, or be
+# dropped at busy times, which is what backstop.yml is for.
+#
+# The log is public, so it prints only the status code. The token is the
+# Actions secret CRON_SECRET and never appears in a file or a log.
+name: tick
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: tick
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Wake the queue
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          [ -n "$CRON_SECRET" ] || { echo "::error title=No token::the CRON_SECRET secret is not set"; exit 1; }
+          code=$(curl -sS -o /dev/null --max-time 45 -X POST -H "Authorization: Bearer $CRON_SECRET" -w '%{http_code}' 'https://www.alongrail.com/api/outreach/tick?from=clock') || { echo "::error title=Not reached::the tick endpoint could not be reached"; exit 1; }
+          echo "answered $code"
+          [ "$code" = "202" ] || { echo "::error title=Not woken::the tick endpoint answered $code (404 means the token here and on the server differ)"; exit 1; }
