@@ -1,4 +1,5 @@
 # The backstop: wakes the Alongrail outreach queue once an hour.
+# (Re-registered 30 September 2026: GitHub fired no scheduled run from the first push.)
 # The same call as tick.yml, at :17 past the hour (away from the top of
 # the hour, when GitHub delays and drops the most scheduled runs).
 #

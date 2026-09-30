@@ -1,4 +1,5 @@
 # Keeps the schedules alive. GitHub turns off a public repository's
+# (Re-registered 30 September 2026: GitHub fired no scheduled run from the first push.)
 # scheduled workflows after 60 days without activity. Once a month this
 # re-enables tick.yml and backstop.yml, and, when the last commit is 25
 # days old or more, adds an empty commit — so there is never a 60-day gap.
